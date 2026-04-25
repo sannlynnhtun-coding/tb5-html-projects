@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory Management</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0fdfa',
+                            100: '#ccfbf1',
+                            200: '#99f6e4',
+                            300: '#5eead4',
+                            400: '#2dd4bf',
+                            500: '#14b8a6',
+                            600: '#0d9488',
+                            700: '#0f766e',
+                            800: '#115e59',
+                            900: '#134e4a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom scrollbar for webkit */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1); 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2); 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3); 
+        }
+        
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+        }
+
+        body {
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+            color: #e2e8f0;
+        }
+        
+        .table-container {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        th {
+            background: rgba(15, 23, 42, 0.6);
+        }
+        
+        tr {
+            transition: all 0.2s ease;
+        }
+        tr:hover {
+            background: rgba(51, 65, 85, 0.5);
+        }
+
+        /* Input styles */
+        .input-field {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            color: #f8fafc;
+            transition: all 0.3s ease;
+        }
+        .input-field:focus {
+            outline: none;
+            border-color: #2dd4bf;
+            box-shadow: 0 0 0 2px rgba(45, 212, 191, 0.2);
+            background: rgba(15, 23, 42, 0.8);
+        }
+    </style>
+</head>
+<body class="min-h-screen font-sans antialiased flex flex-col items-center justify-start p-4 sm:p-8">
+
+    <main class="w-full max-w-6xl relative">
+        
+        <!-- Header -->
+        <header class="flex justify-between items-center mb-8 pb-4 border-b border-slate-700">
+            <div>
+                <h1 class="text-3xl md:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-teal-400 to-blue-500 tracking-tight">
+                    Inventory Nexus
+                </h1>
+                <p class="text-slate-400 mt-1 text-sm md:text-base">Manage your products efficiently.</p>
+            </div>
+            
+            <button id="btn-show-add" class="group relative px-6 py-2.5 font-semibold text-white rounded-lg bg-gradient-to-r from-teal-500 to-brand-600 hover:from-teal-400 hover:to-brand-500 shadow-lg shadow-teal-500/30 transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0 flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 transition-transform group-hover:rotate-90" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+                <span>Add Product</span>
+            </button>
+        </header>
+
+        <!-- VIEW: Product Listing -->
+        <section id="view-listing" class="transition-all duration-500 ease-in-out opacity-100 transform translate-y-0">
+            
+            <!-- Empty State -->
+            <div id="empty-state" class="hidden flex flex-col items-center justify-center py-20 px-4 text-center table-container rounded-2xl shadow-2xl">
+                <div class="w-24 h-24 mb-6 text-slate-500 opacity-50">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                    </svg>
+                </div>
+                <h3 class="text-2xl font-medium text-slate-300 mb-2">No products found</h3>
+                <p class="text-slate-500 max-w-sm mb-6">Your inventory is currently empty. Start by adding your first product to manage it here.</p>
+                <button id="btn-empty-add" class="px-5 py-2 text-sm font-medium text-brand-400 border border-brand-400 rounded-lg hover:bg-brand-400 hover:text-slate-900 transition-colors duration-300">
+                    Add First Product
+                </button>
+            </div>
+
+            <!-- Data Table -->
+            <div id="table-container" class="table-container rounded-2xl shadow-2xl overflow-hidden hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr>
+                                <th class="p-4 text-xs font-semibold tracking-wider text-slate-400 uppercase border-b border-slate-700/50">ID</th>
+                                <th class="p-4 text-xs font-semibold tracking-wider text-slate-400 uppercase border-b border-slate-700/50">Product Name</th>
+                                <th class="p-4 text-xs font-semibold tracking-wider text-slate-400 uppercase border-b border-slate-700/50 hidden md:table-cell">Description</th>
+                                <th class="p-4 text-xs font-semibold tracking-wider text-slate-400 uppercase border-b border-slate-700/50">Quantity</th>
+                                <th class="p-4 text-xs font-semibold tracking-wider text-slate-400 uppercase border-b border-slate-700/50">Location</th>
+                                <th class="p-4 text-xs font-semibold tracking-wider text-slate-400 uppercase border-b border-slate-700/50 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="product-table-body" class="text-sm divide-y divide-slate-700/50">
+                            <!-- Rows will be populated by jQuery -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="mt-4 text-right text-sm text-slate-500" id="inventory-stats">
+                Total Items: <span id="total-items-count" class="font-medium text-slate-300">0</span>
+            </div>
+        </section>
+
+        <!-- VIEW: Product Details (Add/Edit Form) -->
+        <section id="view-details" class="hidden transition-all duration-500 ease-in-out opacity-0 transform translate-y-4">
+            <div class="table-container rounded-2xl shadow-2xl p-6 md:p-8 max-w-3xl mx-auto">
+                <div class="flex items-center justify-between mb-6 border-b border-slate-700/50 pb-4">
+                    <h2 id="form-title" class="text-2xl font-semibold text-white">Add New Product</h2>
+                    <button id="btn-cancel" class="text-slate-400 hover:text-white transition-colors p-2 rounded-full hover:bg-slate-700/50">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+
+                <form id="product-form" class="space-y-6">
+                    <input type="hidden" id="product-id">
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Name -->
+                        <div class="space-y-2 md:col-span-2">
+                            <label for="product-name" class="block text-sm font-medium text-slate-300">Product Name <span class="text-red-400">*</span></label>
+                            <input type="text" id="product-name" required placeholder="e.g. Wireless Keyboard" 
+                                class="input-field w-full rounded-lg px-4 py-3">
+                        </div>
+
+                        <!-- Quantity -->
+                        <div class="space-y-2">
+                            <label for="product-quantity" class="block text-sm font-medium text-slate-300">Quantity <span class="text-red-400">*</span></label>
+                            <input type="number" id="product-quantity" required min="0" placeholder="0" 
+                                class="input-field w-full rounded-lg px-4 py-3">
+                        </div>
+
+                        <!-- Location -->
+                        <div class="space-y-2">
+                            <label for="product-location" class="block text-sm font-medium text-slate-300">Location</label>
+                            <input type="text" id="product-location" placeholder="e.g. Warehouse A, Shelf 3" 
+                                class="input-field w-full rounded-lg px-4 py-3">
+                        </div>
+
+                        <!-- Description -->
+                        <div class="space-y-2 md:col-span-2">
+                            <label for="product-description" class="block text-sm font-medium text-slate-300">Description</label>
+                            <textarea id="product-description" rows="3" placeholder="Brief description of the product..." 
+                                class="input-field w-full rounded-lg px-4 py-3 resize-none"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end gap-3 pt-6 border-t border-slate-700/50">
+                        <button type="button" id="btn-cancel-form" class="px-6 py-2.5 text-sm font-medium text-slate-300 bg-transparent border border-slate-600 rounded-lg hover:bg-slate-700 hover:text-white transition-colors duration-200">
+                            Cancel
+                        </button>
+                        <button type="submit" class="px-6 py-2.5 text-sm font-medium text-slate-900 bg-brand-400 rounded-lg hover:bg-brand-300 shadow-lg shadow-brand-500/20 transition-colors duration-200">
+                            Save Product
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Delete Confirmation Modal (Hidden by default) -->
+    <div id="delete-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 backdrop-blur-sm opacity-0 transition-opacity duration-300">
+        <div class="table-container rounded-2xl shadow-2xl p-6 max-w-sm w-full mx-4 transform scale-95 transition-transform duration-300">
+            <div class="text-center">
+                <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-900/30 mb-4">
+                    <svg class="h-6 w-6 text-red-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                </div>
+                <h3 class="text-lg font-medium text-white mb-2">Delete Product</h3>
+                <p class="text-sm text-slate-400 mb-6">Are you sure you want to delete <span id="delete-item-name" class="font-semibold text-slate-200"></span>? This action cannot be undone.</p>
+                
+                <div class="flex justify-center gap-3">
+                    <button id="btn-cancel-delete" class="px-4 py-2 text-sm font-medium text-slate-300 bg-slate-800 rounded-lg hover:bg-slate-700 transition-colors">
+                        Cancel
+                    </button>
+                    <button id="btn-confirm-delete" class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-500 shadow-lg shadow-red-600/20 transition-colors">
+                        Delete
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="app.js"></script>
+</body>
+</html>
