@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RentHouse — Find & Post Listings</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <style>
+        .bg-brand         { background: linear-gradient(135deg, #1565c0 0%, #0288d1 100%); }
+        .shadow-brand     { box-shadow: 0 2px 12px rgba(2, 136, 209, .35); }
+
+        .tab-btn {
+            border-radius: 9999px;
+            padding: .45rem 1.3rem;
+            font-weight: 500;
+            border: 2px solid #90caf9;
+            color: #1565c0;
+            cursor: pointer;
+            transition: all .2s;
+            background: transparent;
+            display: inline-flex;
+            align-items: center;
+            gap: .35rem;
+        }
+        .tab-btn.active, .tab-btn:hover {
+            background: linear-gradient(135deg, #1565c0, #0288d1);
+            border-color: transparent;
+            color: #fff;
+            box-shadow: 0 4px 14px rgba(2, 136, 209, .35);
+        }
+
+        .stat-card { transition: transform .2s; }
+        .stat-card:hover { transform: translateY(-4px); }
+
+        .btn-save {
+            background: linear-gradient(135deg, #1565c0, #0288d1);
+            color: #fff;
+            border: none;
+            font-weight: 600;
+            border-radius: .5rem;
+            padding: .55rem 1rem;
+            cursor: pointer;
+            transition: all .2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: .3rem;
+        }
+        .btn-save:hover {
+            background: linear-gradient(135deg, #0d47a1, #0277bd);
+            box-shadow: 0 4px 14px rgba(2, 136, 209, .4);
+        }
+
+        .btn-contact {
+            background: linear-gradient(135deg, #1565c0, #0288d1);
+            color: #fff;
+            border: none;
+            font-weight: 600;
+            border-radius: .5rem;
+            padding: .4rem .85rem;
+            cursor: pointer;
+            font-size: .8rem;
+            display: inline-flex;
+            align-items: center;
+            gap: .3rem;
+            text-decoration: none;
+            transition: all .2s;
+        }
+        .btn-contact:hover {
+            background: linear-gradient(135deg, #0d47a1, #0277bd);
+            box-shadow: 0 4px 12px rgba(2, 136, 209, .4);
+            color: #fff;
+        }
+
+        .house-card { transition: transform .2s, box-shadow .2s; }
+        .house-card:hover { transform: translateY(-6px); box-shadow: 0 8px 30px rgba(0,0,0,.15); }
+
+        tbody tr { transition: background .15s; }
+    </style>
+</head>
+
+<body class="bg-[#f0f4f8] flex flex-col min-h-screen">
+
+    <!-- ══ NAVBAR ══════════════════════════════════════════════════════════════ -->
+    <nav class="fixed top-0 left-0 right-0 z-50 bg-brand shadow-brand">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex items-center justify-between h-16">
+                <a href="#" class="text-white font-bold text-xl tracking-wide flex items-center gap-2">
+                    <i class="bi bi-house-heart-fill"></i>RentHouse
+                </a>
+                <div class="flex items-center gap-5">
+                    <button onclick="showTab('post')"
+                        class="text-white/80 hover:text-white font-medium text-sm transition-colors flex items-center gap-1">
+                        <i class="bi bi-plus-square"></i>
+                        <span class="hidden sm:inline">Post Listing</span>
+                    </button>
+                    <button onclick="showTab('find')"
+                        class="text-white/80 hover:text-white font-medium text-sm transition-colors flex items-center gap-1">
+                        <i class="bi bi-search"></i>
+                        <span class="hidden sm:inline">Find a House</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ══ MAIN CONTENT ════════════════════════════════════════════════════════ -->
+    <main class="flex-grow pt-20 pb-8">
+        <div class="max-w-7xl mx-auto px-4 py-4">
+
+            <!-- Stat Cards -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                <div class="stat-card bg-white rounded-2xl shadow-md p-4 flex items-center gap-3">
+                    <div class="w-12 h-12 rounded-xl flex-shrink-0 flex items-center justify-center text-2xl text-white bg-brand">
+                        <i class="bi bi-houses-fill"></i>
+                    </div>
+                    <div>
+                        <div class="text-2xl font-bold" id="statTotal">0</div>
+                        <div class="text-gray-500 text-xs">Total Listings</div>
+                    </div>
+                </div>
+                <div class="stat-card bg-white rounded-2xl shadow-md p-4 flex items-center gap-3">
+                    <div class="w-12 h-12 rounded-xl flex-shrink-0 flex items-center justify-center text-2xl text-white"
+                         style="background:linear-gradient(135deg,#1a7a4a,#26a69a)">
+                        <i class="bi bi-check-circle-fill"></i>
+                    </div>
+                    <div>
+                        <div class="text-2xl font-bold text-emerald-600" id="statAvailable">0</div>
+                        <div class="text-gray-500 text-xs">Available</div>
+                    </div>
+                </div>
+                <div class="stat-card bg-white rounded-2xl shadow-md p-4 flex items-center gap-3">
+                    <div class="w-12 h-12 rounded-xl flex-shrink-0 flex items-center justify-center text-2xl text-white"
+                         style="background:linear-gradient(135deg,#e65100,#f57c00)">
+                        <i class="bi bi-building-fill"></i>
+                    </div>
+                    <div>
+                        <div class="text-2xl font-bold text-orange-600" id="statApartments">0</div>
+                        <div class="text-gray-500 text-xs">Apartments</div>
+                    </div>
+                </div>
+                <div class="stat-card bg-white rounded-2xl shadow-md p-4 flex items-center gap-3">
+                    <div class="w-12 h-12 rounded-xl flex-shrink-0 flex items-center justify-center text-2xl text-white"
+                         style="background:linear-gradient(135deg,#6a1b9a,#8e24aa)">
+                        <i class="bi bi-house-fill"></i>
+                    </div>
+                    <div>
+                        <div class="text-2xl font-bold text-purple-600" id="statHouses">0</div>
+                        <div class="text-gray-500 text-xs">Houses</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab Pills -->
+            <div class="flex flex-wrap gap-2 mb-6">
+                <button id="tabBtnPost" class="tab-btn active" onclick="showTab('post')">
+                    <i class="bi bi-plus-square-fill"></i>Post Listing (Owner)
+                </button>
+                <button id="tabBtnFind" class="tab-btn" onclick="showTab('find')">
+                    <i class="bi bi-binoculars-fill"></i>Find a House (Renter)
+                </button>
+            </div>
+
+            <!-- ═══ POST LISTING TAB ════════════════════════════════════════════ -->
+            <div id="tab-post">
+
+                <!-- Form Card -->
+                <div class="bg-white rounded-2xl shadow-md overflow-hidden mb-6">
+                    <div class="bg-brand px-5 py-3 text-white font-semibold flex items-center gap-2 text-sm">
+                        <i class="bi bi-plus-circle-fill"></i>
+                        <span id="postFormTitle">Add New Listing</span>
+                    </div>
+                    <div class="p-5">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-12 gap-3">
+
+                            <!-- Title -->
+                            <div class="md:col-span-4">
+                                <label class="block text-sm font-semibold text-gray-700 mb-1">
+                                    <i class="bi bi-card-text mr-1 text-blue-600"></i>Title
+                                </label>
+                                <input type="text" id="hTitle" placeholder="e.g. Cozy 2BR near City Hall"
+                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
+                            </div>
+
+                            <!-- Location -->
+                            <div class="md:col-span-3">
+                                <label class="block text-sm font-semibold text-gray-700 mb-1">
+                                    <i class="bi bi-geo-alt mr-1"></i>Location / Township
+                                </label>
+                                <input type="text" id="hLocation" placeholder="e.g. Sanchaung, Yangon"
+                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
+                            </div>
+
+                            <!-- Type -->
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-semibold text-gray-700 mb-1">
+                                    <i class="bi bi-grid mr-1"></i>Type
+                                </label>
+                                <select id="hType"
+                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
+                                    <option value="">Select type</option>
+                                    <option value="Apartment">Apartment</option>
+                                    <option value="House">House</option>
+                                    <option value="Condo">Condo</option>
+                                    <option value="Studio">Studio</option>
+                                    <option value="Room">Room</option>
+                                </select>
+                            </div>
+
+                            <!-- Beds -->
+                            <div class="md:col-span-1">
+                                <label class="block text-sm font-semibold text-gray-700 mb-1">
+                                    <i class="bi bi-door-closed mr-1"></i>Beds
+                                </label>
+                                <input type="number" id="hBedrooms" placeholder="2" min="0"
+                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
+                            </div>
+
+                            <!-- Baths -->
+                            <div class="md:col-span-1">
+                                <label class="block text-sm font-semibold text-gray-700 mb-1">
+                                    <i class="bi bi-droplet mr-1"></i>Baths
+                                </label>
+                                <input type="number" id="hBathrooms" placeholder="1" min="0"
+                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
+                            </div>
+
+                            <!-- Price -->
+                            <div class="md:col-span-3">
+                                <label class="block text-sm font-semibold text-gray-700 mb-1">
+                                    <i class="bi bi-cash-coin mr-1"></i>Monthly Rent (Ks)
+                                </label>
+                                <div class="flex">
+                                    <span class="bg-gray-100 border border-r-0 border-gray-300 rounded-l-lg px-3 py-2 text-sm text-gray-500">Ks</span>
+                                    <input type="number" id="hPrice" placeholder="300,000" min="0"
+                                        class="flex-1 min-w-0 border border-gray-300 rounded-r-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
+                                </div>
+                            </div>
+
+                            <!-- Contact -->
+                            <div class="md:col-span-3">
+                                <label class="block text-sm font-semibold text-gray-700 mb-1">
+                                    <i class="bi bi-telephone mr-1"></i>Contact (Phone)
+                                </label>
+                                <input type="text" id="hContact" placeholder="09-XXXXXXXXX"
+                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
+                            </div>
+
+                            <!-- Description -->
+                            <div class="md:col-span-4">
+                                <label class="block text-sm font-semibold text-gray-700 mb-1">
+                                    <i class="bi bi-chat-left-text mr-1"></i>Description
+                                </label>
+                                <input type="text" id="hDescription" placeholder="e.g. Fully furnished, AC, Wi-Fi included"
+                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
+                            </div>
+
+                            <!-- Available -->
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-semibold text-gray-700 mb-1">
+                                    <i class="bi bi-toggle-on mr-1"></i>Available
+                                </label>
+                                <select id="hAvailable"
+                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
+                                    <option value="Yes">Yes</option>
+                                    <option value="No">No</option>
+                                </select>
+                            </div>
+
+                            <!-- Save Button -->
+                            <div class="md:col-span-2 flex items-end">
+                                <button type="button" id="btnPostSave" class="btn-save w-full">
+                                    <i class="bi bi-save2"></i> Save
+                                </button>
+                            </div>
+                        </div>
+                        <div id="postAlert" class="hidden mt-3 rounded-lg px-4 py-3 text-sm" role="alert"></div>
+                    </div>
+                </div>
+
+                <!-- Table Card -->
+                <div class="bg-white rounded-2xl shadow-md overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left">
+                            <thead>
+                                <tr class="bg-blue-50 border-b-2 border-blue-200 text-blue-700 font-semibold whitespace-nowrap">
+                                    <th class="px-5 py-3">#</th>
+                                    <th class="px-4 py-3">Actions</th>
+                                    <th class="px-4 py-3">Title</th>
+                                    <th class="px-4 py-3">Location</th>
+                                    <th class="px-4 py-3">Type</th>
+                                    <th class="px-4 py-3 text-center">Beds / Baths</th>
+                                    <th class="px-4 py-3">Monthly Rent</th>
+                                    <th class="px-4 py-3">Contact</th>
+                                    <th class="px-4 py-3">Available</th>
+                                </tr>
+                            </thead>
+                            <tbody id="postRows">
+                                <tr>
+                                    <td colspan="9" class="text-center text-gray-400 py-14">
+                                        <i class="bi bi-house-x text-5xl block mb-2 opacity-30"></i>
+                                        No listings yet. Post your first house above.
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div><!-- /tab-post -->
+
+            <!-- ═══ FIND A HOUSE TAB ════════════════════════════════════════════ -->
+            <div id="tab-find" class="hidden">
+
+                <!-- Search & Filter Card -->
+                <div class="bg-white rounded-2xl shadow-md p-5 mb-6">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-12 gap-3">
+                        <div class="md:col-span-4">
+                            <label class="block text-sm font-semibold text-gray-700 mb-1">
+                                <i class="bi bi-search mr-1 text-blue-600"></i>Search by Title or Location
+                            </label>
+                            <input type="text" id="searchKeyword" placeholder="e.g. Sanchaung, cozy…"
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                oninput="applySearch()">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-semibold text-gray-700 mb-1">
+                                <i class="bi bi-funnel mr-1"></i>Type
+                            </label>
+                            <select id="filterType" onchange="applySearch()"
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
+                                <option value="">All Types</option>
+                                <option value="Apartment">Apartment</option>
+                                <option value="House">House</option>
+                                <option value="Condo">Condo</option>
+                                <option value="Studio">Studio</option>
+                                <option value="Room">Room</option>
+                            </select>
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-semibold text-gray-700 mb-1">
+                                <i class="bi bi-cash mr-1"></i>Max Rent (Ks)
+                            </label>
+                            <input type="number" id="filterMaxPrice" placeholder="Any" min="0"
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                oninput="applySearch()">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-semibold text-gray-700 mb-1">
+                                <i class="bi bi-toggle-on mr-1"></i>Availability
+                            </label>
+                            <select id="filterAvail" onchange="applySearch()"
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
+                                <option value="">All</option>
+                                <option value="Yes">Available</option>
+                                <option value="No">Rented Out</option>
+                            </select>
+                        </div>
+                        <div class="md:col-span-2 flex items-end">
+                            <button onclick="applySearch()" class="btn-save w-full">
+                                <i class="bi bi-search"></i> Search
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Results count -->
+                <p class="text-gray-400 text-xs mb-4" id="findResultCount"></p>
+
+                <!-- Cards Grid -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5" id="findCards">
+                    <div class="col-span-full text-center text-gray-400 py-14">
+                        <i class="bi bi-house-x text-5xl block mb-2 opacity-30"></i>
+                        No listings found. Try a different search or check back later.
+                    </div>
+                </div>
+
+            </div><!-- /tab-find -->
+
+        </div><!-- /container -->
+    </main>
+
+    <!-- ══ FOOTER ══════════════════════════════════════════════════════════════ -->
+    <footer class="bg-brand py-4 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+            <span class="text-white font-semibold flex items-center gap-2">
+                <i class="bi bi-house-heart-fill"></i>RentHouse
+            </span>
+            <span class="text-white/75 text-sm">House Rental Listing System &mdash; &copy; 2026</span>
+        </div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"
+        integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <script>
+        const tbHouses = 'RentHouseListings';
+        let editId = null;
+
+        // ── Utilities ─────────────────────────────────────────────────────────
+        function getList() {
+            const data = localStorage.getItem(tbHouses);
+            return data == null ? [] : JSON.parse(data);
+        }
+
+        function saveList(lst) {
+            localStorage.setItem(tbHouses, JSON.stringify(lst));
+        }
+
+        function showAlert(alertId, message, type) {
+            const cfg = {
+                success: { bg: 'bg-green-50',  border: 'border border-green-200',  text: 'text-green-800',  icon: 'bi-check-circle-fill'        },
+                danger:  { bg: 'bg-red-50',    border: 'border border-red-200',    text: 'text-red-800',    icon: 'bi-x-circle-fill'             },
+                warning: { bg: 'bg-yellow-50', border: 'border border-yellow-200', text: 'text-yellow-800', icon: 'bi-exclamation-triangle-fill' }
+            };
+            const c = cfg[type] || cfg.success;
+            $('#' + alertId)
+                .removeClass('hidden bg-green-50 bg-red-50 bg-yellow-50 text-green-800 text-red-800 text-yellow-800 border border-green-200 border-red-200 border-yellow-200')
+                .addClass(`${c.bg} ${c.border} ${c.text} flex items-center gap-2`)
+                .html(`<i class="bi ${c.icon}"></i><span>${message}</span>`);
+            setTimeout(() => {
+                $('#' + alertId).addClass('hidden').removeClass('flex items-center gap-2');
+            }, 3000);
+        }
+
+        function updateStats() {
+            const lst = getList();
+            $('#statTotal').text(lst.length);
+            $('#statAvailable').text(lst.filter(x => x.Available === 'Yes').length);
+            $('#statApartments').text(lst.filter(x => x.Type === 'Apartment').length);
+            $('#statHouses').text(lst.filter(x => x.Type === 'House').length);
+        }
+
+        function formatPrice(p) {
+            return parseInt(p).toLocaleString('en-US');
+        }
+
+        function typeIcon(type) {
+            return { Apartment: 'bi-building', House: 'bi-house-fill', Condo: 'bi-building-fill', Studio: 'bi-door-open-fill', Room: 'bi-door-closed-fill' }[type] || 'bi-house';
+        }
+
+        // ── Tab Switching ─────────────────────────────────────────────────────
+        function showTab(tab) {
+            $('#tab-post, #tab-find').addClass('hidden');
+            $('#tab-' + tab).removeClass('hidden');
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('tabBtn' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.add('active');
+            if (tab === 'find') applySearch();
+        }
+
+        // ── CRUD ─────────────────────────────────────────────────────────────
+        loadListings();
+
+        $('#btnPostSave').click(function () {
+            editId == null ? saveListing() : updateListing();
+        });
+
+        function collectForm() {
+            return {
+                title:       $('#hTitle').val().trim(),
+                location:    $('#hLocation').val().trim(),
+                type:        $('#hType').val(),
+                bedrooms:    $('#hBedrooms').val() || 0,
+                bathrooms:   $('#hBathrooms').val() || 0,
+                price:       $('#hPrice').val(),
+                contact:     $('#hContact').val().trim(),
+                description: $('#hDescription').val().trim(),
+                available:   $('#hAvailable').val()
+            };
+        }
+
+        function validateForm(f) {
+            if (!f.title || !f.location || !f.type || f.price === '' || !f.contact) {
+                showAlert('postAlert', 'Please fill in Title, Location, Type, Price, and Contact.', 'danger');
+                return false;
+            }
+            return true;
+        }
+
+        function saveListing() {
+            const f = collectForm();
+            if (!validateForm(f)) return;
+
+            const item = {
+                Id:          crypto.randomUUID(),
+                Title:       f.title,
+                Location:    f.location,
+                Type:        f.type,
+                Bedrooms:    f.bedrooms,
+                Bathrooms:   f.bathrooms,
+                Price:       f.price,
+                Contact:     f.contact,
+                Description: f.description,
+                Available:   f.available,
+                PostedDate:  new Date().toLocaleDateString()
+            };
+
+            const lst = getList();
+            lst.push(item);
+            saveList(lst);
+            clearForm();
+            bindTable(lst);
+            updateStats();
+            showAlert('postAlert', 'Listing posted successfully.', 'success');
+        }
+
+        function updateListing() {
+            const f = collectForm();
+            if (!validateForm(f)) return;
+
+            const lst   = getList();
+            const index = lst.findIndex(x => x.Id === editId);
+            if (index < 0) return;
+
+            lst[index].Title       = f.title;
+            lst[index].Location    = f.location;
+            lst[index].Type        = f.type;
+            lst[index].Bedrooms    = f.bedrooms;
+            lst[index].Bathrooms   = f.bathrooms;
+            lst[index].Price       = f.price;
+            lst[index].Contact     = f.contact;
+            lst[index].Description = f.description;
+            lst[index].Available   = f.available;
+
+            saveList(lst);
+            editId = null;
+            $('#postFormTitle').text('Add New Listing');
+            clearForm();
+            bindTable(lst);
+            updateStats();
+            showAlert('postAlert', 'Listing updated successfully.', 'success');
+        }
+
+        function loadListings() {
+            bindTable(getList());
+            updateStats();
+        }
+
+        function bindTable(lst) {
+            if (lst.length === 0) {
+                $('#postRows').html(`<tr><td colspan="9" class="text-center text-gray-400 py-14">
+                    <i class="bi bi-house-x text-5xl block mb-2 opacity-30"></i>
+                    No listings yet. Post your first house above.</td></tr>`);
+                return;
+            }
+
+            let rows = '';
+            for (let i = 0; i < lst.length; i++) {
+                const item = lst[i];
+                const availBadge = item.Available === 'Yes'
+                    ? `<span class="text-xs bg-green-100 text-green-700 px-3 py-1 rounded-full font-medium"><i class="bi bi-check-circle mr-1"></i>Available</span>`
+                    : `<span class="text-xs bg-gray-100 text-gray-600 px-3 py-1 rounded-full font-medium"><i class="bi bi-x-circle mr-1"></i>Rented</span>`;
+
+                rows += `
+                    <tr class="border-b border-gray-100 hover:bg-blue-50">
+                        <td class="px-5 py-3 text-gray-400">${i + 1}</td>
+                        <td class="px-4 py-3 whitespace-nowrap">
+                            <button onclick="editListing('${item.Id}')"
+                                class="text-xs border border-yellow-400 text-yellow-600 px-2 py-1 rounded mr-1 hover:bg-yellow-50 transition-colors">
+                                <i class="bi bi-pencil-fill"></i>
+                            </button>
+                            <button onclick="deleteListing('${item.Id}')"
+                                class="text-xs border border-red-400 text-red-600 px-2 py-1 rounded hover:bg-red-50 transition-colors">
+                                <i class="bi bi-trash3-fill"></i>
+                            </button>
+                        </td>
+                        <td class="px-4 py-3 font-semibold">${item.Title}</td>
+                        <td class="px-4 py-3 text-gray-500">
+                            <i class="bi bi-geo-alt-fill text-red-400 mr-1"></i>${item.Location}
+                        </td>
+                        <td class="px-4 py-3">
+                            <span class="text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-full font-medium">${item.Type}</span>
+                        </td>
+                        <td class="px-4 py-3 text-center text-gray-600">
+                            <i class="bi bi-door-closed mr-1"></i>${item.Bedrooms}
+                            &nbsp;/&nbsp;
+                            <i class="bi bi-droplet mr-1"></i>${item.Bathrooms}
+                        </td>
+                        <td class="px-4 py-3 font-semibold text-blue-600">Ks ${formatPrice(item.Price)}</td>
+                        <td class="px-4 py-3">
+                            <a href="tel:${item.Contact}" class="text-blue-500 hover:underline text-sm">${item.Contact}</a>
+                        </td>
+                        <td class="px-4 py-3">${availBadge}</td>
+                    </tr>`;
+            }
+            $('#postRows').html(rows);
+        }
+
+        function deleteListing(id) {
+            if (!confirm('Are you sure you want to delete this listing?')) return;
+            const items = getList().filter(x => x.Id !== id);
+            saveList(items);
+            bindTable(items);
+            updateStats();
+            showAlert('postAlert', 'Listing deleted.', 'warning');
+        }
+
+        function editListing(id) {
+            const item = getList().find(x => x.Id === id);
+            if (!item) return;
+            editId = id;
+            $('#postFormTitle').text('Edit Listing');
+            $('#hTitle').val(item.Title);
+            $('#hLocation').val(item.Location);
+            $('#hType').val(item.Type);
+            $('#hBedrooms').val(item.Bedrooms);
+            $('#hBathrooms').val(item.Bathrooms);
+            $('#hPrice').val(item.Price);
+            $('#hContact').val(item.Contact);
+            $('#hDescription').val(item.Description);
+            $('#hAvailable').val(item.Available);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function clearForm() {
+            $('#hTitle, #hLocation, #hBedrooms, #hBathrooms, #hPrice, #hContact, #hDescription').val('');
+            $('#hType').val('');
+            $('#hAvailable').val('Yes');
+            editId = null;
+            $('#postFormTitle').text('Add New Listing');
+        }
+
+        // ── FIND A HOUSE ─────────────────────────────────────────────────────
+        function applySearch() {
+            const keyword  = $('#searchKeyword').val().trim().toLowerCase();
+            const type     = $('#filterType').val();
+            const maxPrice = parseFloat($('#filterMaxPrice').val());
+            const avail    = $('#filterAvail').val();
+
+            let lst = getList();
+            if (keyword)  lst = lst.filter(x => x.Title.toLowerCase().includes(keyword) || x.Location.toLowerCase().includes(keyword));
+            if (type)     lst = lst.filter(x => x.Type === type);
+            if (!isNaN(maxPrice) && maxPrice > 0) lst = lst.filter(x => parseFloat(x.Price) <= maxPrice);
+            if (avail)    lst = lst.filter(x => x.Available === avail);
+
+            const availCount = lst.filter(x => x.Available === 'Yes').length;
+            $('#findResultCount').text(`${lst.length} listing(s) found — ${availCount} available`);
+            bindCards(lst);
+        }
+
+        function bindCards(lst) {
+            if (lst.length === 0) {
+                $('#findCards').html(`<div class="col-span-full text-center text-gray-400 py-14">
+                    <i class="bi bi-house-x text-5xl block mb-2 opacity-30"></i>
+                    No listings found. Try a different search or check back later.</div>`);
+                return;
+            }
+
+            let cards = '';
+            for (let i = 0; i < lst.length; i++) {
+                const item  = lst[i];
+                const icon  = typeIcon(item.Type);
+                const avail = item.Available === 'Yes';
+                const badge = avail
+                    ? `<span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-medium"><i class="bi bi-check-circle mr-1"></i>Available</span>`
+                    : `<span class="text-xs bg-gray-100 text-gray-500 px-2 py-1 rounded-full font-medium"><i class="bi bi-x-circle mr-1"></i>Rented</span>`;
+                const desc = item.Description || 'No description provided.';
+
+                cards += `
+                    <div class="house-card bg-white rounded-2xl shadow-md overflow-hidden flex flex-col">
+                        <div class="h-40 bg-brand flex items-center justify-center">
+                            <i class="bi ${icon} text-6xl text-white/80"></i>
+                        </div>
+                        <div class="p-4 flex flex-col flex-grow">
+                            <div class="flex items-start justify-between gap-2 mb-1">
+                                <h6 class="font-bold text-gray-800 leading-tight">${item.Title}</h6>
+                                ${badge}
+                            </div>
+                            <p class="text-gray-400 text-xs mb-2">
+                                <i class="bi bi-geo-alt-fill text-red-400 mr-1"></i>${item.Location}
+                            </p>
+                            <p class="text-gray-500 text-xs mb-3 line-clamp-2">${desc}</p>
+                            <div class="flex flex-wrap gap-3 text-xs text-gray-500 mb-4">
+                                <span class="bg-blue-50 text-blue-700 px-2 py-1 rounded-full">
+                                    <i class="bi bi-grid-3x2 mr-1"></i>${item.Type}
+                                </span>
+                                <span><i class="bi bi-door-closed mr-1"></i>${item.Bedrooms} Beds</span>
+                                <span><i class="bi bi-droplet mr-1"></i>${item.Bathrooms} Baths</span>
+                            </div>
+                            <div class="mt-auto flex items-center justify-between">
+                                <div>
+                                    <span class="text-lg font-bold text-blue-600">Ks ${formatPrice(item.Price)}</span>
+                                    <span class="text-gray-400 text-xs">/mo</span>
+                                </div>
+                                <a href="tel:${item.Contact}" class="btn-contact">
+                                    <i class="bi bi-telephone-fill"></i>${item.Contact}
+                                </a>
+                            </div>
+                            <p class="text-gray-300 text-xs mt-2">
+                                <i class="bi bi-calendar3 mr-1"></i>Posted: ${item.PostedDate}
+                            </p>
+                        </div>
+                    </div>`;
+            }
+            $('#findCards').html(cards);
+        }
+
+        updateStats();
+    </script>
+</body>
+
+</html>
