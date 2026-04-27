@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoCare Manage | Tailwind & Vanilla JS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            DEFAULT: '#4f46e5',
+                            hover: '#4338ca',
+                        },
+                        success: {
+                            DEFAULT: '#10b981',
+                            hover: '#059669',
+                        },
+                        danger: {
+                            DEFAULT: '#ef4444',
+                            hover: '#dc2626',
+                        },
+                        warning: {
+                            DEFAULT: '#f59e0b',
+                        },
+                        dark: '#0f172a',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        outfit: ['Outfit', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'custom': '0 10px 25px rgba(0, 0, 0, 0.04)',
+                        'custom-hover': '0 20px 40px rgba(0, 0, 0, 0.08)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style type="text/tailwindcss">
+        @layer base {
+            body {
+                @apply bg-[#f6f8fd] font-sans text-slate-700 min-h-screen pb-12;
+                background: linear-gradient(135deg, #f6f8fd 0%, #f1f5f9 100%);
+            }
+            h1, h2, h3, h4, h5, h6 {
+                @apply font-outfit;
+            }
+        }
+
+        @layer components {
+            .section-title {
+                @apply font-bold text-dark relative pb-2 mt-8 mb-6 text-2xl;
+            }
+            .section-title::after {
+                content: '';
+                @apply absolute left-0 bottom-0 h-1 w-10 bg-primary rounded-full;
+            }
+            
+            .custom-card {
+                @apply bg-white rounded-2xl shadow-custom transition-all duration-300 overflow-hidden mb-6 hover:-translate-y-1 hover:shadow-custom-hover;
+            }
+
+            .form-input-group {
+                @apply p-4 bg-slate-50 rounded-xl mb-4;
+            }
+            
+            .btn-base {
+                @apply px-5 py-2.5 rounded-xl font-semibold transition-all duration-200 inline-flex items-center justify-center gap-2 active:scale-95 disabled:opacity-50;
+            }
+            
+            .btn-primary {
+                @apply bg-primary text-white shadow-md hover:bg-primary-hover hover:-translate-y-0.5;
+            }
+            
+            .btn-outline {
+                @apply bg-transparent border-2 border-gray-200 text-gray-500 hover:bg-gray-100 hover:text-dark;
+            }
+
+            .badge-custom {
+                @apply px-2 py-1 rounded-md font-semibold text-xs tracking-wide;
+            }
+
+            .form-input {
+                @apply w-full px-4 py-2.5 rounded-xl border-2 border-slate-200 bg-slate-100 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/15 transition-all outline-none text-dark;
+            }
+        }
+
+        .table-container::-webkit-scrollbar { height: 6px; }
+        .table-container::-webkit-scrollbar-thumb { @apply bg-gray-200 rounded-full; }
+        
+        [data-lucide] { width: 1.25rem; height: 1.25rem; }
+    </style>
+</head>
+
+<body>
+
+    <nav class="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-white/30 shadow-sm mb-8">
+        <div class="max-w-7xl mx-auto px-4 h-16 flex items-center">
+            <span class="text-primary font-outfit font-bold text-2xl flex items-center gap-3">
+                <i data-lucide="car"></i>
+                AutoCare Manage
+            </span>
+        </div>
+    </nav>
+
+    <div id="alertContainer" class="fixed top-5 right-5 z-[1050] flex flex-col gap-3 min-w-[320px] pointer-events-none"></div>
+
+    <div class="max-w-7xl mx-auto px-4">
+        <h3 class="section-title">New Service Record</h3>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-12">
+            <div class="lg:col-span-4">
+                <div class="custom-card">
+                    <div class="p-6 border-b border-slate-50">
+                        <span class="text-xl font-outfit font-semibold text-dark flex items-center gap-2">
+                            <i data-lucide="clipboard-plus" class="text-primary"></i> 
+                            Record Details
+                        </span>
+                    </div>
+                    <div class="p-6 pt-2">
+                        <form id="recordForm">
+                            <div class="form-input-group">
+                                <h6 class="text-slate-500 font-semibold mb-4 border-b border-slate-200 pb-2 flex items-center gap-2">
+                                    <i data-lucide="info"></i> Vehicle Info
+                                </h6>
+                                <div class="mb-4">
+                                    <label for="carBrand" class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Car Brand & Model</label>
+                                    <input type="text" id="carBrand" required placeholder="e.g. Toyota Camry" class="form-input">
+                                </div>
+                                <div class="mb-1">
+                                    <label for="carPlate" class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">License Plate</label>
+                                    <input type="text" id="carPlate" required placeholder="ABC-1234" class="form-input uppercase">
+                                </div>
+                            </div>
+
+                            <div class="form-input-group">
+                                <h6 class="text-slate-500 font-semibold mb-4 border-b border-slate-200 pb-2 flex items-center gap-2">
+                                    <i data-lucide="wrench"></i> Service Info
+                                </h6>
+                                <div class="mb-4">
+                                    <label for="serviceName" class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Service Name</label>
+                                    <input type="text" id="serviceName" required placeholder="e.g. Full Detail Wash" class="form-input">
+                                </div>
+                                <div class="mb-4">
+                                    <label for="serviceCategory" class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Category</label>
+                                    <select id="serviceCategory" required class="form-input appearance-none">
+                                        <option value="" disabled selected>Select category</option>
+                                        <option value="Quick Wash">Quick Wash</option>
+                                        <option value="Premium">Premium</option>
+                                        <option value="Detailing">Detailing</option>
+                                    </select>
+                                </div>
+                                <div class="mb-4">
+                                    <label for="servicePrice" class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Price ($)</label>
+                                    <input type="number" step="0.01" id="servicePrice" required placeholder="0.00" class="form-input">
+                                </div>
+                                <div class="mb-1">
+                                    <label for="serviceDescription" class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Notes</label>
+                                    <textarea id="serviceDescription" rows="2" placeholder="Optional notes..." class="form-input resize-none"></textarea>
+                                </div>
+                            </div>
+
+                            <div class="flex flex-col sm:flex-row gap-3">
+                                <button type="button" id="btnClearForm" class="btn-base btn-outline flex-1">
+                                    <i data-lucide="rotate-ccw"></i> Clear
+                                </button>
+                                <button type="button" id="btnSaveRecord" class="btn-base btn-primary flex-1">
+                                    <i data-lucide="check-circle-2"></i> <span>Save Record</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lg:col-span-8">
+                <div class="custom-card">
+                    <div class="p-6 border-b border-slate-50 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <span class="text-xl font-outfit font-semibold text-dark flex items-center gap-2">
+                            <i data-lucide="list" class="text-primary"></i> 
+                            Service History
+                        </span>
+                        <div class="relative group">
+                            <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors"></i>
+                            <input type="text" id="searchRecord" placeholder="Search plates or services..."
+                                class="pl-11 pr-4 py-2 bg-slate-100 rounded-full border border-transparent focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all outline-none text-sm w-full md:w-64">
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div class="overflow-x-auto table-container">
+                            <table class="w-full border-separate border-spacing-y-2">
+                                <thead>
+                                    <tr class="text-left text-slate-400 text-xs font-bold uppercase tracking-widest">
+                                        <th class="px-4 py-2">Vehicle</th>
+                                        <th class="px-4 py-2">Service Details</th>
+                                        <th class="px-4 py-2">Price</th>
+                                        <th class="px-4 py-2 text-center">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="recordTableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const RECORDS_KEY = 'cw_unifiedRecordsData';
+        let editRecordId = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadRecords();
+            lucide.createIcons();
+
+            document.getElementById('btnSaveRecord').addEventListener('click', () => {
+                if (validateForm('#recordForm')) {
+                    if (editRecordId) {
+                        updateRecord(editRecordId);
+                    } else {
+                        addRecord();
+                    }
+                }
+            });
+
+            document.getElementById('btnClearForm').addEventListener('click', clearForm);
+
+            document.getElementById('searchRecord').addEventListener('keyup', (e) => {
+                const value = e.target.value.toLowerCase();
+                const rows = document.querySelectorAll("#recordTableBody tr");
+                rows.forEach(row => {
+                    row.style.display = row.innerText.toLowerCase().includes(value) ? '' : 'none';
+                });
+            });
+        });
+
+        function validateForm(formId) {
+            const form = document.querySelector(formId);
+            const requiredFields = form.querySelectorAll('input[required], select[required]');
+            let isValid = true;
+            
+            requiredFields.forEach(field => {
+                if (!field.value.trim()) {
+                    field.classList.add('!border-red-400');
+                    isValid = false;
+                } else {
+                    field.classList.remove('!border-red-400');
+                }
+            });
+            
+            if (!isValid) showAlert("Please fill in all required fields.", "warning", "alert-triangle");
+            return isValid;
+        }
+
+        function showAlert(msg, type = 'success', iconName = 'check-circle') {
+            const id = Math.random().toString(36).substring(7);
+            const container = document.getElementById('alertContainer');
+            
+            let colorClass = 'border-primary';
+            let iconBg = 'bg-primary';
+            
+            if (type === 'danger') { colorClass = 'border-red-500'; iconBg = 'bg-red-500'; iconName = 'trash-2'; }
+            if (type === 'primary') { colorClass = 'border-indigo-500'; iconBg = 'bg-indigo-500'; iconName = 'edit'; }
+            if (type === 'warning') { colorClass = 'border-amber-500'; iconBg = 'bg-amber-500'; iconName = 'alert-triangle'; }
+            if (type === 'success') { colorClass = 'border-emerald-500'; iconBg = 'bg-emerald-500'; }
+
+            const alert = document.createElement('div');
+            alert.id = `alert-${id}`;
+            alert.className = `pointer-events-auto bg-white rounded-xl shadow-xl border-l-[6px] ${colorClass} p-4 flex items-center gap-4 transform transition-all duration-500 translate-x-full`;
+            alert.innerHTML = `
+                <div class="w-10 h-10 ${iconBg} rounded-full flex items-center justify-center text-white flex-shrink-0">
+                    <i data-lucide="${iconName}" class="w-5 h-5"></i>
+                </div>
+                <span class="font-semibold text-slate-700 flex-1">${msg}</span>
+                <button class="text-slate-400 hover:text-slate-600 transition-colors close-btn">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            `;
+            
+            container.appendChild(alert);
+            lucide.createIcons({ props: { "stroke-width": 2.5 }, attrs: { class: "w-5 h-5" } });
+            
+            alert.querySelector('.close-btn').onclick = () => {
+                alert.classList.add('translate-x-full', 'opacity-0');
+                setTimeout(() => alert.remove(), 500);
+            };
+
+            setTimeout(() => alert.classList.remove('translate-x-full'), 10);
+            setTimeout(() => {
+                if (alert.parentNode) {
+                    alert.classList.add('translate-x-full', 'opacity-0');
+                    setTimeout(() => alert.remove(), 500);
+                }
+            }, 3500);
+        }
+
+        function getRecords() {
+            const data = localStorage.getItem(RECORDS_KEY);
+            return data ? JSON.parse(data) : [];
+        }
+
+        function saveRecords(records) {
+            localStorage.setItem(RECORDS_KEY, JSON.stringify(records));
+        }
+
+        function loadRecords() {
+            const records = getRecords();
+            renderTable(records);
+        }
+
+        function addRecord() {
+            const records = getRecords();
+            const newRecord = {
+                id: crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36),
+                carBrand: document.getElementById('carBrand').value,
+                carPlate: document.getElementById('carPlate').value.toUpperCase(),
+                serviceName: document.getElementById('serviceName').value,
+                serviceCategory: document.getElementById('serviceCategory').value,
+                servicePrice: parseFloat(document.getElementById('servicePrice').value),
+                serviceDescription: document.getElementById('serviceDescription').value
+            };
+
+            records.push(newRecord);
+            saveRecords(records);
+            loadRecords();
+            clearForm();
+            showAlert("Service record saved successfully!", "success");
+        }
+
+        function updateRecord(id) {
+            let records = getRecords();
+            const index = records.findIndex(r => r.id === id);
+
+            if (index !== -1) {
+                records[index] = {
+                    ...records[index],
+                    carBrand: document.getElementById('carBrand').value,
+                    carPlate: document.getElementById('carPlate').value.toUpperCase(),
+                    serviceName: document.getElementById('serviceName').value,
+                    serviceCategory: document.getElementById('serviceCategory').value,
+                    servicePrice: parseFloat(document.getElementById('servicePrice').value),
+                    serviceDescription: document.getElementById('serviceDescription').value
+                };
+
+                saveRecords(records);
+                loadRecords();
+                clearForm();
+                showAlert("Service record updated successfully!", "primary");
+            }
+        }
+
+        window.editRecord = function (id) {
+            const records = getRecords();
+            const record = records.find(r => r.id === id);
+            if (record) {
+                editRecordId = id;
+                document.getElementById('carBrand').value = record.carBrand;
+                document.getElementById('carPlate').value = record.carPlate;
+                document.getElementById('serviceName').value = record.serviceName;
+                document.getElementById('serviceCategory').value = record.serviceCategory;
+                document.getElementById('servicePrice').value = record.servicePrice;
+                document.getElementById('serviceDescription').value = record.serviceDescription;
+                
+                document.querySelector('#btnSaveRecord span').innerText = 'Update Record';
+                document.querySelector('#btnSaveRecord i').setAttribute('data-lucide', 'edit-3');
+                lucide.createIcons();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        };
+
+        window.deleteRecord = function (id) {
+            if (confirm("Are you sure you want to delete this service record?")) {
+                let records = getRecords();
+                records = records.filter(r => r.id !== id);
+                saveRecords(records);
+                loadRecords();
+                clearForm();
+                showAlert("Record successfully removed.", "danger");
+            }
+        };
+
+        function clearForm() {
+            editRecordId = null;
+            document.getElementById('recordForm').reset();
+            const inputs = document.querySelectorAll('#recordForm input, #recordForm select');
+            inputs.forEach(input => input.classList.remove('!border-red-400'));
+            document.querySelector('#btnSaveRecord span').innerText = 'Save Record';
+            document.querySelector('#btnSaveRecord i').setAttribute('data-lucide', 'check-circle-2');
+            lucide.createIcons();
+        }
+
+        function renderTable(records) {
+            const tbody = document.getElementById('recordTableBody');
+            if (records.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="text-center text-slate-400 py-12"><div class="flex flex-col items-center opacity-20"><i data-lucide="inbox" class="w-16 h-16 mb-4"></i>No records found. Add one to get started!</div></td></tr>';
+                lucide.createIcons();
+                return;
+            }
+
+            let html = '';
+            records.forEach(r => {
+                let badgeClass = 'bg-indigo-50 text-indigo-600';
+                if (r.serviceCategory === 'Premium') badgeClass = 'bg-amber-50 text-amber-600';
+                if (r.serviceCategory === 'Detailing') badgeClass = 'bg-purple-50 text-purple-600';
+
+                html += `
+                    <tr class="group hover:bg-slate-50 transition-colors">
+                        <td class="px-4 py-4 bg-slate-100 group-hover:bg-slate-200/50 rounded-l-2xl">
+                            <strong class="text-slate-800 block">${r.carBrand}</strong>
+                            <span class="inline-block mt-1 px-2 py-0.5 bg-white border border-slate-200 rounded-md text-[10px] font-bold tracking-widest text-slate-500 shadow-sm uppercase">${r.carPlate}</span>
+                        </td>
+                        <td class="px-4 py-4 bg-slate-100 group-hover:bg-slate-200/50">
+                            <div class="flex items-center gap-2">
+                                <strong class="text-slate-700">${r.serviceName}</strong>
+                                <span class="badge-custom ${badgeClass}">${r.serviceCategory}</span>
+                            </div>
+                            <div class="text-slate-400 text-xs mt-1 max-w-xs truncate">${r.serviceDescription || '<span class="italic opacity-50 text-[10px]">No notes</span>'}</div>
+                        </td>
+                        <td class="px-4 py-4 bg-slate-100 group-hover:bg-slate-200/50">
+                            <span class="text-slate-800 font-bold font-outfit text-lg">$${r.servicePrice.toFixed(2)}</span>
+                        </td>
+                        <td class="px-4 py-4 bg-slate-100 group-hover:bg-slate-200/50 text-center rounded-r-2xl">
+                            <div class="flex items-center justify-center gap-2">
+                                <button class="w-9 h-9 flex items-center justify-center rounded-xl bg-white text-slate-400 hover:text-amber-500 hover:bg-amber-50 transition-all shadow-sm" onclick="editRecord('${r.id}')" title="Edit">
+                                    <i data-lucide="edit-2"></i>
+                                </button>
+                                <button class="w-9 h-9 flex items-center justify-center rounded-xl bg-white text-slate-400 hover:text-red-500 hover:bg-red-50 transition-all shadow-sm" onclick="deleteRecord('${r.id}')" title="Delete">
+                                    <i data-lucide="trash-2"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = html;
+            lucide.createIcons();
+        }
+    </script>
+</body>
+
+</html>

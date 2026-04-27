@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoCare Manage</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <nav class="navbar custom-nav sticky-top mb-4">
+        <div class="container">
+            <span class="navbar-brand mb-0 h1">
+                <i class="bi bi-car-front-fill text-primary"></i>
+                AutoCare Manage
+            </span>
+        </div>
+    </nav>
+
+    <div class="alert-container" id="alertContainer"></div>
+
+    <div class="container">
+
+        <h3 class="section-title">New Service Record</h3>
+        <div class="row mb-5">
+            <div class="col-md-4">
+                <div class="card custom-card">
+                    <div class="card-header bg-transparent border-0 pt-4 pb-2">
+                        <span class="fs-5"><i class="bi bi-clipboard2-plus me-2 text-primary"></i> Record Details</span>
+                    </div>
+                    <div class="card-body pt-0">
+                        <form id="recordForm">
+                            <div class="p-3 bg-light rounded-3 mb-4">
+                                <h6 class="text-secondary mb-3 border-bottom pb-2"><i class="bi bi-car-front"></i> Vehicle Information</h6>
+                                <div class="mb-3">
+                                    <label for="carBrand" class="form-label">Car Brand & Model</label>
+                                    <input type="text" class="form-control" id="carBrand" required placeholder="e.g. Toyota Camry">
+                                </div>
+                                <div class="mb-2">
+                                    <label for="carPlate" class="form-label">License Plate</label>
+                                    <input type="text" class="form-control text-uppercase" id="carPlate" required placeholder="ABC-1234">
+                                </div>
+                            </div>
+
+                            <div class="p-3 bg-light rounded-3 mb-4">
+                                <h6 class="text-secondary mb-3 border-bottom pb-2"><i class="bi bi-tools"></i> Service Information</h6>
+                                <div class="mb-3">
+                                    <label for="serviceName" class="form-label">Service Name</label>
+                                    <input type="text" class="form-control" id="serviceName" required placeholder="e.g. Full Detail Wash">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="serviceCategory" class="form-label">Category</label>
+                                    <select class="form-select" id="serviceCategory" required>
+                                        <option value="" disabled selected>Select category</option>
+                                        <option value="Quick Wash">Quick Wash</option>
+                                        <option value="Premium">Premium</option>
+                                        <option value="Detailing">Detailing</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="servicePrice" class="form-label">Price ($)</label>
+                                    <input type="number" step="0.01" class="form-control" id="servicePrice" required placeholder="0.00">
+                                </div>
+                                <div class="mb-2">
+                                    <label for="serviceDescription" class="form-label">Notes</label>
+                                    <textarea class="form-control" id="serviceDescription" rows="2" placeholder="Optional notes..."></textarea>
+                                </div>
+                            </div>
+
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                <button type="button" class="btn-custom btn-outline-custom" id="btnClearForm">
+                                    <i class="bi bi-x-circle"></i> Clear
+                                </button>
+                                <button type="button" class="btn-custom btn-primary-custom" id="btnSaveRecord">
+                                    <i class="bi bi-check2-circle"></i> Save Record
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-8">
+                <div class="card custom-card">
+                    <div class="card-header pt-4 pb-3">
+                        <span class="fs-5"><i class="bi bi-journal-text me-2 text-primary"></i> Service History</span>
+                        <div class="search-input-wrapper">
+                            <i class="bi bi-search"></i>
+                            <input type="text" id="searchRecord" class="form-control form-control-sm" placeholder="Search plates or services...">
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table-custom">
+                                <thead>
+                                    <tr>
+                                        <th>Vehicle</th>
+                                        <th>Service Details</th>
+                                        <th>Price</th>
+                                        <th class="text-center">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="recordTableBody">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        const RECORDS_KEY = 'cw_unifiedRecordsData';
+
+        let editRecordId = null;
+
+        $(document).ready(function () {
+            loadRecords();
+
+            $('#btnSaveRecord').click(function () {
+                if (validateForm('#recordForm')) {
+                    if (editRecordId) {
+                        updateRecord(editRecordId);
+                    } else {
+                        addRecord();
+                    }
+                }
+            });
+
+            $('#btnClearForm').click(clearForm);
+
+            $('#searchRecord').on('keyup', function () {
+                let value = $(this).val().toLowerCase();
+                $("#recordTableBody tr").filter(function () {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+                });
+            });
+        });
+
+        function validateForm(formSelector) {
+            let isValid = true;
+            $(formSelector + ' input[required], ' + formSelector + ' select[required]').each(function () {
+                if (!$(this).val()) {
+                    $(this).addClass('is-invalid');
+                    isValid = false;
+                } else {
+                    $(this).removeClass('is-invalid');
+                }
+            });
+            if (!isValid) showAlert("Please fill in all required fields.", "warning", "bi-exclamation-triangle");
+            return isValid;
+        }
+
+        function showAlert(msg, type = 'success', icon = 'bi-check-circle') {
+            const id = crypto.randomUUID ? crypto.randomUUID() : Date.now();
+
+            if (type === 'danger') icon = 'bi-trash';
+            if (type === 'primary') icon = 'bi-pencil-square';
+            if (type === 'warning') icon = 'bi-exclamation-triangle';
+
+            const alertHTML = `
+                <div id="alert-${id}" class="alert-custom alert-${type}">
+                    <div class="icon-wrapper">
+                        <i class="bi ${icon}"></i>
+                    </div>
+                    <span>${msg}</span>
+                    <button onclick="$(this).parent().remove()">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </div>
+            `;
+            $('#alertContainer').append(alertHTML);
+
+            setTimeout(() => {
+                const el = $(`#alert-${id}`);
+                el.css('animation', 'slideInRight 0.3s ease-in reverse forwards');
+                setTimeout(() => el.remove(), 300);
+            }, 3000);
+        }
+
+        function generateId() {
+            return window.crypto && window.crypto.randomUUID ? window.crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).substr(2);
+        }
+
+        function getRecords() {
+            let data = localStorage.getItem(RECORDS_KEY);
+            return data ? JSON.parse(data) : [];
+        }
+
+        function saveRecords(records) {
+            localStorage.setItem(RECORDS_KEY, JSON.stringify(records));
+        }
+
+        function loadRecords() {
+            let records = getRecords();
+            renderTable(records);
+        }
+
+        function addRecord() {
+            let records = getRecords();
+            let newRecord = {
+                id: generateId(),
+                carBrand: $('#carBrand').val(),
+                carPlate: $('#carPlate').val().toUpperCase(),
+                serviceName: $('#serviceName').val(),
+                serviceCategory: $('#serviceCategory').val(),
+                servicePrice: parseFloat($('#servicePrice').val()),
+                serviceDescription: $('#serviceDescription').val()
+            };
+
+            records.push(newRecord);
+            saveRecords(records);
+            loadRecords();
+            clearForm();
+            showAlert("Service record saved successfully!", "success");
+        }
+
+        function updateRecord(id) {
+            let records = getRecords();
+            let index = records.findIndex(r => r.id === id);
+
+            if (index !== -1) {
+                records[index].carBrand = $('#carBrand').val();
+                records[index].carPlate = $('#carPlate').val().toUpperCase();
+                records[index].serviceName = $('#serviceName').val();
+                records[index].serviceCategory = $('#serviceCategory').val();
+                records[index].servicePrice = parseFloat($('#servicePrice').val());
+                records[index].serviceDescription = $('#serviceDescription').val();
+
+                saveRecords(records);
+                loadRecords();
+                clearForm();
+                showAlert("Service record updated successfully!", "primary");
+            }
+        }
+
+        window.editRecord = function (id) {
+            let records = getRecords();
+            let record = records.find(r => r.id === id);
+            if (record) {
+                editRecordId = id;
+                $('#carBrand').val(record.carBrand);
+                $('#carPlate').val(record.carPlate);
+                $('#serviceName').val(record.serviceName);
+                $('#serviceCategory').val(record.serviceCategory);
+                $('#servicePrice').val(record.servicePrice);
+                $('#serviceDescription').val(record.serviceDescription);
+                
+                $('#btnSaveRecord').html('<i class="bi bi-pencil-square"></i> Update Record');
+            }
+        };
+
+        window.deleteRecord = function (id) {
+            if (confirm("Are you sure you want to delete this service record?")) {
+                let records = getRecords();
+                records = records.filter(r => r.id !== id);
+                saveRecords(records);
+                loadRecords();
+                clearForm();
+                showAlert("Record successfully removed.", "danger");
+            }
+        };
+
+        function clearForm() {
+            editRecordId = null;
+            $('#recordForm')[0].reset();
+            $('#recordForm .is-invalid').removeClass('is-invalid');
+            $('#btnSaveRecord').html('<i class="bi bi-check2-circle"></i> Save Record');
+        }
+
+        function renderTable(records) {
+            let html = '';
+            if (records.length === 0) {
+                html = '<tr><td colspan="4" class="text-center text-muted py-4"><i class="bi bi-inbox fs-3 d-block mb-2"></i>No records found. Add one to get started!</td></tr>';
+            } else {
+                records.forEach(r => {
+                    let badgeClass = 'badge-quick';
+                    if (r.serviceCategory === 'Premium') badgeClass = 'badge-premium';
+                    if (r.serviceCategory === 'Detailing') badgeClass = 'badge-detailing';
+
+                    html += `
+                        <tr>
+                            <td>
+                                <strong>${r.carBrand}</strong>
+                                <div class="mt-2">
+                                    <span class="badge border bg-white text-dark shadow-sm px-2 py-1" style="letter-spacing:1px">${r.carPlate}</span>
+                                </div>
+                            </td>
+                            <td>
+                                <strong class="text-dark">${r.serviceName}</strong> 
+                                <span class="badge-custom ${badgeClass} ms-2" style="font-size:0.7em">${r.serviceCategory}</span>
+                                <div class="text-muted small mt-1">${r.serviceDescription || '<span class="fst-italic opacity-50">No additional notes</span>'}</div>
+                            </td>
+                            <td><strong class="text-dark fs-6">$${r.servicePrice.toFixed(2)}</strong></td>
+                            <td class="text-center">
+                                <button class="btn-action edit" onclick="editRecord('${r.id}')" title="Edit Record">
+                                    <i class="bi bi-pencil-fill"></i>
+                                </button>
+                                <button class="btn-action delete" onclick="deleteRecord('${r.id}')" title="Delete Record">
+                                    <i class="bi bi-trash3-fill"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            }
+            $('#recordTableBody').html(html);
+        }
+    </script>
+</body>
+
+</html>
