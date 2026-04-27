@@ -1,0 +1,21 @@
+# Inventory Management App Tasks
+
+- [x] Project Setup
+  - [x] Create [index.html](file:///c:/repos/tb5-html-projects/MT/Antigravity/Bootstrap_jQuery/index.html) with Bootstrap and jQuery CDNs
+  - [x] Create [style.css](file:///c:/repos/tb5-html-projects/MT/Antigravity/Bootstrap_jQuery/style.css) for custom styling
+  - [x] Create [app.js](file:///c:/repos/tb5-html-projects/MT/Antigravity/Bootstrap_jQuery/app.js) for logic
+- [x] Local Storage Service
+  - [x] Implement `getProducts()`
+  - [x] Implement `saveProduct(product)`
+  - [x] Implement `deleteProduct(id)`
+- [x] Product Listing
+  - [x] Render products in a table format
+  - [x] Add Actions column (View, Edit, Delete)
+- [x] Product Forms (Add/Edit)
+  - [x] Create Bootstrap Modal for Add/Edit forms
+  - [x] Handle form submission (create vs update)
+  - [x] Validation logic
+- [x] Product Details
+  - [x] Create Bootstrap Modal or dedicated section for viewing details
+- [x] Delete Confirmation
+  - [x] Handle delete button click, show confirmation, update list
