@@ -1,0 +1,6 @@
+{
+  "name": "MT Order Flow",
+  "description": "A product order management app with graphical D3.js workflow visualization, dark mode, and persistent storage.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}
