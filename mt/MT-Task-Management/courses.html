@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Courses — MT Task Management</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
+  <link href="style.css" rel="stylesheet" />
+</head>
+<body class="bg-light">
+
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top">
+    <div class="container">
+      <a class="navbar-brand" href="index.html">
+        <i class="bi bi-check2-square me-1"></i>MT Task Management
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu"
+              aria-controls="navMenu" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navMenu">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+          <li class="nav-item"><a class="nav-link" href="index.html"><i class="bi bi-house me-1"></i>Dashboard</a></li>
+          <li class="nav-item"><a class="nav-link" href="projects.html"><i class="bi bi-folder2 me-1"></i>Projects</a></li>
+          <li class="nav-item"><a class="nav-link" href="courses.html"><i class="bi bi-book me-1"></i>Courses</a></li>
+          <li class="nav-item"><a class="nav-link" href="tasks.html"><i class="bi bi-kanban me-1"></i>Tasks</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container py-4">
+
+    <!-- Page header -->
+    <div class="page-header d-flex justify-content-between align-items-center">
+      <div>
+        <h1><i class="bi bi-book text-info me-2"></i>Courses</h1>
+        <p class="text-muted mb-0 small">Track your online learning. Click <em>View Tasks</em> to manage modules and resources.</p>
+      </div>
+      <button class="btn btn-info text-white" id="btn-add-course">
+        <i class="bi bi-plus-lg me-1"></i>Add Course
+      </button>
+    </div>
+
+    <!-- Courses grid -->
+    <div class="row g-3" id="courses-grid">
+      <div class="col-12">
+        <div class="empty-state">
+          <i class="bi bi-book-plus"></i>
+          <p>No courses yet.<br>Click <strong>Add Course</strong> to get started.</p>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Toast -->
+  <div id="toast-container" class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index:9999"></div>
+
+  <!-- Add / Edit Course Modal -->
+  <div class="modal fade" id="courseModal" tabindex="-1" aria-labelledby="course-modal-title" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="course-modal-title">Add Course</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form id="course-form" novalidate>
+          <div class="modal-body">
+            <div class="mb-3">
+              <label class="form-label fw-medium" for="course-name">
+                Course Name <span class="text-danger">*</span>
+              </label>
+              <input type="text" class="form-control" id="course-name"
+                     placeholder="e.g., JavaScript: The Complete Guide" required maxlength="150" />
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-medium" for="course-description">Description</label>
+              <textarea class="form-control" id="course-description" rows="2"
+                        placeholder="Optional course description…" maxlength="500"></textarea>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-medium" for="course-instructor">Instructor</label>
+              <input type="text" class="form-control" id="course-instructor"
+                     placeholder="e.g., John Doe" maxlength="120" />
+            </div>
+            <div class="mb-1">
+              <label class="form-label fw-medium" for="course-provider">
+                Course Provider <span class="text-danger">*</span>
+              </label>
+              <select class="form-select" id="course-provider">
+                <option value="Instructor">Instructor (Direct)</option>
+                <option value="Pluralsight">Pluralsight</option>
+                <option value="YouTube">YouTube</option>
+                <option value="Coursera">Coursera</option>
+                <option value="Udemy">Udemy</option>
+                <option value="edX">edX</option>
+                <option value="LinkedIn Learning">LinkedIn Learning</option>
+                <option value="freeCodeCamp">freeCodeCamp</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-info text-white"><i class="bi bi-floppy me-1"></i>Save</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/courses.js"></script>
+</body>
+</html>

@@ -1,0 +1,121 @@
+:root {
+  --bg-color: #ffffff;
+  --text-color: #212529;
+  --card-bg: #f8f9fa;
+  --border-color: #dee2e6;
+  --sidebar-bg: #343a40;
+  --accent-color: #0d6efd;
+}
+
+[data-bs-theme="dark"] {
+  --bg-color: #121212;
+  --text-color: #e0e0e0;
+  --card-bg: #1e1e1e;
+  --border-color: #333333;
+  --sidebar-bg: #0a0a0a;
+  --accent-color: #3d8bfd;
+}
+
+body {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  transition:
+    background-color 0.3s,
+    color 0.3s;
+  font-family:
+    "Inter",
+    system-ui,
+    -apple-system,
+    sans-serif;
+}
+
+.navbar {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.page {
+  display: none;
+  padding: 2rem 0;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.page.active {
+  display: block;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.card {
+  background-color: var(--card-bg);
+  border-color: var(--border-color);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: transform 0.2s;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+}
+
+/* D3 Viz Styling */
+#workflow-viz {
+  width: 100%;
+  height: 400px;
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.node circle {
+  stroke: #fff;
+  stroke-width: 2px;
+}
+
+.node text {
+  font-size: 12px;
+  fill: var(--text-color);
+}
+
+.link {
+  fill: none;
+  stroke: #ccc;
+  stroke-width: 2px;
+}
+
+.state-active circle {
+  fill: #0d6efd;
+  filter: drop-shadow(0 0 5px #0d6efd);
+}
+
+.state-inactive circle {
+  fill: #999;
+}
+
+.state-completed circle {
+  fill: #198754;
+}
+
+.state-failed circle {
+  fill: #dc3545;
+}
+
+.theme-toggle {
+  cursor: pointer;
+  font-size: 1.5rem;
+}
+
+.status-badge {
+  font-size: 0.8rem;
+  padding: 0.4em 0.8em;
+  border-radius: 50px;
+}

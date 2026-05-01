@@ -1,0 +1,127 @@
+/* MT Task Management — Custom Styles */
+
+/* ── Navbar ──────────────────────────────────────────────── */
+.navbar-brand { font-weight: 700; letter-spacing: -0.01em; }
+
+/* ── Stat Cards (dashboard) ──────────────────────────────── */
+.stat-icon {
+  width: 52px; height: 52px;
+  border-radius: 14px;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 1.5rem; margin: 0 auto 0.5rem;
+}
+.stat-value { font-size: 2rem; font-weight: 700; line-height: 1; }
+.stat-label {
+  font-size: 0.75rem; color: #6c757d; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.06em;
+}
+.section-icon {
+  width: 42px; height: 42px; border-radius: 10px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; font-size: 1.25rem;
+}
+
+/* ── Entity Cards (projects / courses) ───────────────────── */
+.entity-card { transition: box-shadow 0.15s, transform 0.15s; }
+.entity-card:hover {
+  box-shadow: 0 8px 28px rgba(0,0,0,0.13) !important;
+  transform: translateY(-2px);
+}
+.entity-card .progress { height: 5px; }
+.provider-badge { font-size: 0.7rem; letter-spacing: 0.03em; padding: 0.2em 0.55em; }
+
+/* ── Page header ─────────────────────────────────────────── */
+.page-header {
+  padding: 1.25rem 0 1rem;
+  border-bottom: 1px solid #e2e8f0;
+  margin-bottom: 1.5rem;
+}
+.page-header h1 { font-size: 1.5rem; font-weight: 700; margin: 0; }
+
+/* ── Kanban Board ────────────────────────────────────────── */
+.kanban-wrap { overflow-x: auto; padding-bottom: 0.5rem; }
+.kanban-board {
+  display: flex; gap: 1rem;
+  min-width: 860px;
+  align-items: flex-start;
+}
+.kanban-col {
+  flex: 1; min-width: 210px;
+  background: #f4f6f9;
+  border-radius: 0.75rem; padding: 0.75rem;
+  display: flex; flex-direction: column;
+}
+.kanban-col-header {
+  font-size: 0.75rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.06em;
+  padding: 0.4rem 0.6rem; border-radius: 0.4rem;
+  margin-bottom: 0.75rem;
+  display: flex; align-items: center; justify-content: space-between;
+}
+/* Column colour themes */
+.kanban-col[data-status="todo"]        .kanban-col-header { background:#e2e8f0; color:#475569; }
+.kanban-col[data-status="in-progress"] .kanban-col-header { background:#fef9c3; color:#854d0e; }
+.kanban-col[data-status="review"]      .kanban-col-header { background:#e0f2fe; color:#075985; }
+.kanban-col[data-status="done"]        .kanban-col-header { background:#dcfce7; color:#166534; }
+
+.kanban-cards { flex: 1; min-height: 60px; }
+
+.kanban-card {
+  background: #fff;
+  border: 1px solid rgba(0,0,0,0.08);
+  border-radius: 0.5rem; padding: 0.65rem 0.75rem;
+  margin-bottom: 0.5rem; position: relative;
+  transition: box-shadow 0.12s;
+}
+.kanban-card:hover { box-shadow: 0 4px 14px rgba(0,0,0,0.1); }
+.kanban-card .task-name { font-size: 0.87rem; font-weight: 600; line-height: 1.3; padding-right: 1.4rem; }
+.kanban-card .task-desc { font-size: 0.75rem; color: #64748b; margin-top: 0.25rem; line-height: 1.4; }
+.kanban-card .card-actions { position: absolute; top: 0.45rem; right: 0.45rem; }
+.btn-card-menu {
+  background: none; border: none; padding: 0; line-height: 1;
+  color: #94a3b8; font-size: 1rem; cursor: pointer;
+}
+.btn-card-menu:hover { color: #475569; }
+
+.kanban-add-btn {
+  width: 100%; margin-top: 0.5rem;
+  border: 2px dashed #cbd5e1; background: transparent;
+  border-radius: 0.4rem; padding: 0.4rem;
+  color: #94a3b8; font-size: 0.82rem; cursor: pointer;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+.kanban-add-btn:hover { border-color: #0d6efd; color: #0d6efd; background: rgba(13,110,253,0.04); }
+
+/* ── Course Module View ──────────────────────────────────── */
+.module-task-row {
+  display: flex; align-items: flex-start; gap: 0.75rem;
+  padding: 0.65rem 0; border-bottom: 1px solid #f1f5f9;
+}
+.module-task-row:last-child { border-bottom: none; }
+.module-task-body { flex: 1; min-width: 0; }
+.module-task-name { font-weight: 600; font-size: 0.87rem; }
+.module-task-desc { font-size: 0.78rem; color: #64748b; }
+.module-task-actions { display: flex; gap: 0.3rem; flex-shrink: 0; align-items: center; }
+
+.resource-chip {
+  font-size: 0.72rem;
+  display: inline-flex; align-items: center; gap: 0.2rem;
+  padding: 0.15em 0.5em; border-radius: 0.25rem; text-decoration: none;
+  background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd;
+  transition: background 0.1s;
+}
+.resource-chip:hover { background: #bae6fd; color: #075985; }
+
+/* ── Empty state ─────────────────────────────────────────── */
+.empty-state { text-align: center; padding: 3.5rem 1rem; color: #94a3b8; }
+.empty-state i { font-size: 3rem; display: block; margin-bottom: 0.75rem; }
+.empty-state p { font-size: 0.9rem; margin: 0; }
+
+/* ── Resource input rows (task modal) ────────────────────── */
+.resource-row { display: flex; gap: 0.5rem; align-items: center; margin-bottom: 0.5rem; }
+.resource-row .form-control { font-size: 0.85rem; }
+
+/* ── Responsive kanban ───────────────────────────────────── */
+@media (max-width: 767.98px) {
+  .kanban-board { min-width: 0; flex-direction: column; }
+  .kanban-col   { min-width: 0; }
+}
